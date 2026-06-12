@@ -10,16 +10,43 @@ def create_table():
     cursor = connection.cursor()
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS  media (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            type TEXT,
-            genre TEXT,
-            year INTEGER,
-            image TEXT,
-            rating INTEGER,
-        )
+    CREATE TABLE IF NOT EXISTS  media (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        type TEXT,
+        genre TEXT,
+        year INTEGER,
+        image TEXT,
+        rating INTEGER
+    )
     """)
 
     connection.commit()
     connection.close()
+
+
+def add_media(title, type, genre, year, image, rating):
+    connection = connect()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        """
+        INSERT INTO media (title, type, genre, year, image, rating)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """,
+        (title, type, genre, year, image, rating),
+    )
+
+    connection.commit()
+    connection.close()
+
+
+def get_media():
+    connection = connect()
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM media")
+    data = cursor.fetchall()
+
+    connection.close()
+    return data
