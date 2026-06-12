@@ -2,7 +2,7 @@ import sqlite3
 
 
 def connect():
-    return sqlite3.connect("collection")
+    return sqlite3.connect("collection.db")
 
 
 def create_table():
