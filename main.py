@@ -11,7 +11,8 @@ from PySide6.QtWidgets import (
     QDialog,
     QLineEdit,
     QComboBox,
-    QSpinBox
+    QSpinBox,
+    QFileDialog
 )
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
@@ -38,6 +39,13 @@ class AddWindow(QDialog):
         self.score = QSpinBox()
         self.score.setRange(0, 10)
 
+        self.image_path = ""
+
+        image_button = QPushButton("Seleccionar Portada")
+        image_button.clicked.connect(self.select_image)
+
+        self.image_label = QLabel("Sin Imagen")
+
         save = QPushButton("Guardar")
 
         save.clicked.connect(self.accept)
@@ -45,8 +53,17 @@ class AddWindow(QDialog):
         layout.addWidget(self.title)
         layout.addWidget(self.type)
         layout.addWidget(self.score)
+        layout.addWidget(image_button)
+        layout.addWidget(self.image_label)
         layout.addWidget(save)
         self.setLayout(layout)
+
+    def select_image(self):
+
+        file, _ = QFileDialog.getOpenFileName(self, "Seleccionar Portada", "", "Imagenes(*.png .jpg .jpeg")
+        if file:
+            self.image_path = file
+            self.image_label.setText(file.split("/")[-1])
 
 
 def open_form():
@@ -56,19 +73,20 @@ def open_form():
         title = dialog.title.text()
         media_type = dialog.type.currentText()
         score = dialog.score.value()
+        image = dialog.image_path
 
         add_media(
             title,
             media_type,
             "",
             2025,
-            "",
+            image,
             score
         )
 
-        cards.addWidget(create_card(title, media_type, score))
+        cards.addWidget(create_card(title, media_type, score, image))
 
-def create_card(title, media_type, score):
+def create_card(title, media_type, score, image_path):
     card = QWidget()
 
     layout = QHBoxLayout()
@@ -76,7 +94,9 @@ def create_card(title, media_type, score):
     image = QLabel()
     image.setFixedSize(120, 180)
 
-    pixmap = QPixmap("images/default.png")
+    pixmap = QPixmap(image_path)
+    if pixmap.isNull():
+        pixmap = QPixmap("images/default.png")
 
     image.setPixmap(pixmap.scaled(120, 180))
 
@@ -120,7 +140,8 @@ layout.addWidget(scroll)
 window.setLayout(layout)
 
 for row in get_media():
-    cards.addWidget(create_card(row[1], row[2], row[6]))
+    # 1 Titulo - 2 Tipo - 3 genero - 4 Año - 5 Portada - 6 Rating
+    cards.addWidget(create_card(row[1], row[2], row[6], row[5]))
 
 
 window.show()
