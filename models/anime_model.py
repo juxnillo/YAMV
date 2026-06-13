@@ -1,7 +1,8 @@
 import requests
 
+
 def search_anime_api(query):
-    url = f"https://api.jikan.moe/v4/anime?q={query}&limit=20"
+    url = f"https://api.jikan.moe/v4/anime?q={query}&limit=10"
     try:
         response = requests.get(url)
         if response.status_code == 200:

@@ -1,12 +1,24 @@
 import requests
-from PySide6.QtGui import QPixmap, QIcon
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QListWidget, QListWidgetItem, QWidget, QLabel
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
+
 from models.anime_model import search_anime_api
 from ui import card_widget
 
+
 class ResultCard(QWidget):
-    def __init__(self, title, anime_type, score, image_url):
+    def __init__(self, title, anime_type, score, image_url, year):
         super().__init__()
 
         layout = QHBoxLayout()
@@ -23,7 +35,11 @@ class ResultCard(QWidget):
             headers = {"User-Agent": "Mozilla/5.0"}
             img_data = requests.get(image_url, headers=headers, timeout=5).content
             pixmap.loadFromData(img_data)
-            self.img_label.setPixmap(pixmap.scaled(60, 85, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation))
+            self.img_label.setPixmap(
+                pixmap.scaled(
+                    60, 85, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation
+                )
+            )
         except:
             self.img_label.setText("No Img")
 
@@ -31,8 +47,9 @@ class ResultCard(QWidget):
         self.title_label = QLabel(f"<b>{title}</b>")
         self.title_label.setStyleSheet("color: white; font-size: 14px;")
         self.title_label.setWordWrap(True)
+        display_year = f"({year})" if year and year != 0 else ""
 
-        self.info_label = QLabel(f"{anime_type}  ·  ⭐ {score}/10")
+        self.info_label = QLabel(f"{anime_type} {display_year} ·  ⭐ {score}/10")
         self.info_label.setStyleSheet("color: #8e8e93; font-size: 12px;")
 
         text_layout.addWidget(self.title_label)
@@ -43,6 +60,7 @@ class ResultCard(QWidget):
         layout.addLayout(text_layout)
         self.setLayout(layout)
 
+
 class AddWindow(QDialog):
     def __init__(self):
         super().__init__()
@@ -52,54 +70,52 @@ class AddWindow(QDialog):
 
         self.setStyleSheet("""
                     QDialog {
-                        background-color: #1c1c1e;
+                        background-color: #1e1e2e;
                         font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
                     }
 
                     QLineEdit {
-                        background-color: #2c2c2e;
+                        background-color: #1e1e2e;
                         color: white;
-                        border: 1px solid #3a3a3c;
                         border-radius: 6px;
                         padding: 8px 12px;
                         font-size: 13px;
                     }
                     QLineEdit:focus {
-                        border: 1px solid #0a84ff;
+                        border: 1px solid #853cdd;
                     }
 
-                    QPushButton {
-                        background-color: #3a3a3c;
-                        color: white;
-                        font-weight: bold;
-                        padding: 8px 16px;
-                        border-radius: 6px;
-                        border: none;
-                        font-size: 13px;
-                    }
-                    QPushButton:hover {
-                        background-color: #48484a;
-                    }
-                    QPushButton:pressed {
-                        background-color: #2c2c2e;
-                    }
+                   QPushButton {
+                       background-color: #853cdd;
+                       color: #cdd6f4;
+                       font-weight: bold;
+                       font-size: 13px;
+                       padding: 10px;
+                       border-radius: 6px;
+                       border: none;
+                   }
+                   QPushButton:hover {
+                       background-color: #5500bb;
+                   }
+                   QPushButton:pressed {
+                       background-color: #5500bb;
+                   }
 
                     QPushButton:disabled {
-                        background-color: #2c2c2e;
+                        background-color: #853cdd;
                         color: #545456;
                     }
 
                     QPushButton[text="Añadir a coleccion"] {
-                        background-color: #30d158;
+                        background-color: #853cdd;
                         color: white;
                     }
                     QPushButton[text="Añadir a coleccion"]:hover {
-                        background-color: #34c759;
+                        background-color: #5500bb;
                     }
 
-                    # Lista de Resultados #
                     QListWidget {
-                        background-color: #242426;
+                        background-color: #1e1e2e;
                         color: #e5e5ea;
                         border: 1px solid #2c2c2e;
                         border-radius: 8px;
@@ -112,11 +128,11 @@ class AddWindow(QDialog):
                         border-radius: 4px;
                     }
                     QListWidget::item:hover {
-                        background-color: #2c2c2e;
+                        background-color: #32324c;
                         color: white;
                     }
                     QListWidget::item:selected {
-                        background-color: #0a84ff;
+                        background-color: #32324c;
                         color: white;
                         font-weight: bold;
                     }
@@ -156,6 +172,7 @@ class AddWindow(QDialog):
         self.selected_type = ""
         self.selected_image = ""
         self.selected_score = 0
+        self.selected_year = 0
 
         self.results_list.itemClicked.connect(self.on_item_selected)
 
@@ -174,15 +191,31 @@ class AddWindow(QDialog):
                 title = anime.get("title")
                 anime_type = anime.get("type", "TV")
                 api_score = anime.get("score")
-                score = int(api_score) if api_score and not isinstance(api_score, dict) else 0
+                anime_year = anime.get("year") or 0
+                score = (
+                    int(api_score)
+                    if api_score and not isinstance(api_score, dict)
+                    else 0
+                )
                 images_dict = anime.get("images", {})
                 jpg_dict = images_dict.get("jpg", {})
                 image_url = jpg_dict.get("image_url", "")
 
                 item = QListWidgetItem(self.results_list)
-                card_widget = ResultCard(title, anime_type, score, image_url)
+                card_widget = ResultCard(
+                    title, anime_type, score, image_url, anime_year
+                )
                 item.setSizeHint(QSize(0, 105))
-                item.setData(Qt.UserRole, {"title": title, "type": anime_type, "image": image_url, "score": score})
+                item.setData(
+                    Qt.UserRole,
+                    {
+                        "title": title,
+                        "type": anime_type,
+                        "image": image_url,
+                        "score": score,
+                        "year": anime_year,
+                    },
+                )
                 self.results_list.addItem(item)
                 self.results_list.setItemWidget(item, card_widget)
         else:
@@ -196,7 +229,7 @@ class AddWindow(QDialog):
         self.selected_title = data["title"]
         self.selected_type = data["type"]
         self.selected_image = data["image"]
-
+        self.selected_year = int(data.get("year", 0) or 0)
         raw_score = data.get("score", 0)
         if isinstance(raw_score, dict):
             self.selected_score = int(raw_score.get("value", 0) or 0)

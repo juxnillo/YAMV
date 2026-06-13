@@ -29,7 +29,14 @@ def open_form():
         except (TypeError, ValueError):
             score = 0
 
-        add_media(title, media_type, "", 2026, image, score)
+        try:
+            year = int(dialog.selected_year)
+            if year == 0:
+                year = 0000
+        except (TypeError, ValueError):
+            year = 0
+
+        add_media(title, media_type, "", year, image, score)
         refresh_grid()
 
 
@@ -61,7 +68,7 @@ def refresh_grid():
         columna = index % COLUMNS_MAX
 
         card_widget = create_card(
-            row[0], row[1], row[2], row[6], row[5], on_card_clicked
+            row[0], row[1], row[2], row[4], row[6], row[5], on_card_clicked
         )
         cards_grid.addWidget(card_widget, fila, columna)
 
@@ -76,14 +83,14 @@ window.setWindowTitle("YAMV")
 window.resize(700, 600)
 window.setStyleSheet("""
     QWidget {
-        background-color: #1c1c1e;
+        background-color: #1e1e2e;
         color: #ffffff;
         font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
     }
 
     QPushButton {
-        background-color: #0a84ff;
-        color: white;
+        background-color: #853cdd;
+        color: #cdd6f4;
         font-weight: bold;
         font-size: 13px;
         padding: 10px;
@@ -91,10 +98,10 @@ window.setStyleSheet("""
         border: none;
     }
     QPushButton:hover {
-        background-color: #007aff;
+        background-color: #5500bb;
     }
     QPushButton:pressed {
-        background-color: #0056b3;
+        background-color: #5500bb;
     }
 
     QScrollArea {
