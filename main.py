@@ -1,18 +1,19 @@
 import sys
-from database.db import create_table, get_media, add_media, delete_media
-from ui.add_window import AddWindow
-from ui.card_widget import create_card
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
-    QWidget,
-    QVBoxLayout,
-    QPushButton,
-    QScrollArea,
     QGridLayout,
     QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtCore import Qt
+
+from database.db import add_media, create_table, delete_media, get_media
+from ui.add_window import AddWindow
+from ui.card_widget import create_card
 
 
 def open_form():
@@ -28,14 +29,7 @@ def open_form():
         except (TypeError, ValueError):
             score = 0
 
-        add_media(
-            title,
-            media_type,
-            "",
-            2026,
-            image,
-            score
-        )
+        add_media(title, media_type, "", 2026, image, score)
         refresh_grid()
 
 
@@ -66,8 +60,11 @@ def refresh_grid():
         fila = index // COLUMNS_MAX
         columna = index % COLUMNS_MAX
 
-        card_widget = create_card(row[0], row[1], row[2], row[6], row[5], on_card_clicked)
+        card_widget = create_card(
+            row[0], row[1], row[2], row[6], row[5], on_card_clicked
+        )
         cards_grid.addWidget(card_widget, fila, columna)
+
 
 create_table()
 
