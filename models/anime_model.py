@@ -1,8 +1,7 @@
 import requests
 
 def search_anime_api(query):
-    """Hace la petición a la API de Jikan y devuelve los datos o None si falla"""
-    url = f"https://api.jikan.moe/v4/anime?q={query}&limit=5"
+    url = f"https://api.jikan.moe/v4/anime?q={query}&limit=20"
     try:
         response = requests.get(url)
         if response.status_code == 200:

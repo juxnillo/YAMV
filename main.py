@@ -84,9 +84,8 @@ window.setStyleSheet("""
         font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
     }
 
-    /* Botón Principal */
     QPushButton {
-        background-color: #0a84ff; /* Azul estilo iOS/Moderno */
+        background-color: #0a84ff;
         color: white;
         font-weight: bold;
         font-size: 13px;
@@ -95,13 +94,12 @@ window.setStyleSheet("""
         border: none;
     }
     QPushButton:hover {
-        background-color: #007aff; /* Azul más oscuro al pasar el ratón */
+        background-color: #007aff;
     }
     QPushButton:pressed {
         background-color: #0056b3;
     }
 
-    # Barra de scroll limpia
     QScrollArea {
         border: none;
         background-color: transparent;
