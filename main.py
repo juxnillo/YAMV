@@ -77,13 +77,44 @@ app.setStyle("Fusion")
 window = QWidget()
 window.setWindowTitle("YAMV")
 window.resize(700, 600)
-window.setStyleSheet("QWidget { background-color: #1e1e1e; color: white; } QPushButton { background-color: #3e3e3e; padding: 8px; border-radius: 4px; }")
+window.setStyleSheet("""
+    QWidget {
+        background-color: #1c1c1e;
+        color: #ffffff;
+        font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+    }
+
+    /* Botón Principal */
+    QPushButton {
+        background-color: #0a84ff; /* Azul estilo iOS/Moderno */
+        color: white;
+        font-weight: bold;
+        font-size: 13px;
+        padding: 10px;
+        border-radius: 6px;
+        border: none;
+    }
+    QPushButton:hover {
+        background-color: #007aff; /* Azul más oscuro al pasar el ratón */
+    }
+    QPushButton:pressed {
+        background-color: #0056b3;
+    }
+
+    # Barra de scroll limpia
+    QScrollArea {
+        border: none;
+        background-color: transparent;
+    }
+""")
 
 layout = QVBoxLayout()
+layout.setContentsMargins(20, 20, 20, 20)
 scroll = QScrollArea()
 content = QWidget()
+content.setStyleSheet("background-color: transparent;")
 cards_grid = QGridLayout()
-cards_grid.setSpacing(15)
+cards_grid.setSpacing(18)
 cards_grid.setAlignment(Qt.AlignTop | Qt.AlignLeft)
 
 content.setLayout(cards_grid)
@@ -93,9 +124,9 @@ scroll.setWidgetResizable(True)
 button = QPushButton("Buscar y Añadir")
 button.clicked.connect(open_form)
 
-layout.addWidget(button)
 layout.addWidget(scroll)
-
+layout.addSpacing(10)
+layout.addWidget(button)
 window.setLayout(layout)
 
 refresh_grid()

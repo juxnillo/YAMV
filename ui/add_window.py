@@ -7,14 +7,93 @@ class AddWindow(QDialog):
         super().__init__()
 
         self.setWindowTitle("Buscar en MyAnimeList")
-        self.resize(400, 500)
+        self.resize(500, 600)
+
+        self.setStyleSheet("""
+                    QDialog {
+                        background-color: #1c1c1e;
+                        font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+                    }
+
+                    QLineEdit {
+                        background-color: #2c2c2e;
+                        color: white;
+                        border: 1px solid #3a3a3c;
+                        border-radius: 6px;
+                        padding: 8px 12px;
+                        font-size: 13px;
+                    }
+                    QLineEdit:focus {
+                        border: 1px solid #0a84ff;
+                    }
+
+                    QPushButton {
+                        background-color: #3a3a3c;
+                        color: white;
+                        font-weight: bold;
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        border: none;
+                        font-size: 13px;
+                    }
+                    QPushButton:hover {
+                        background-color: #48484a;
+                    }
+                    QPushButton:pressed {
+                        background-color: #2c2c2e;
+                    }
+
+                    QPushButton:disabled {
+                        background-color: #2c2c2e;
+                        color: #545456;
+                    }
+
+                    QPushButton[text="Añadir a coleccion"] {
+                        background-color: #30d158;
+                        color: white;
+                    }
+                    QPushButton[text="Añadir a coleccion"]:hover {
+                        background-color: #34c759;
+                    }
+
+                    # Lista de Resultados #
+                    QListWidget {
+                        background-color: #242426;
+                        color: #e5e5ea;
+                        border: 1px solid #2c2c2e;
+                        border-radius: 8px;
+                        padding: 5px;
+                        font-size: 13px;
+                    }
+                    QListWidget::item {
+                        padding: 10px;
+                        border-bottom: 1px solid #2c2c2e;
+                        border-radius: 4px;
+                    }
+                    QListWidget::item:hover {
+                        background-color: #2c2c2e;
+                        color: white;
+                    }
+                    QListWidget::item:selected {
+                        background-color: #0a84ff;
+                        color: white;
+                        font-weight: bold;
+                    }
+                """)
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(12)
 
         search_layout = QHBoxLayout()
+        search_layout = QHBoxLayout()
+        search_layout.setSpacing(8)
+
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Nombre del anime...")
-        self.search_button = QPushButton()
+
+        self.search_button = QPushButton("Buscar")
+        self.search_button.setCursor(Qt.PointingHandCursor)
         self.search_button.clicked.connect(self.search_anime)
 
         search_layout.addWidget(self.search_input)
@@ -66,6 +145,9 @@ class AddWindow(QDialog):
 
     def on_item_selected(self, item):
         data = item.data(Qt.UserRole)
+        if not data:
+            return
+
         self.selected_title = data["title"]
         self.selected_type = data["type"]
         self.selected_image = data["image"]

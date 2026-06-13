@@ -33,14 +33,33 @@ def create_card(media_id, title, media_type, score, image_path, click_callback):
     image_label.setPixmap(pixmap.scaled(140, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
     short_title = title if len(title) < 20 else title[:17] + "..."
-    text = QLabel(f"{title}\n{media_type}\n⭐{score}")
+    text = QLabel(
+            f"<div style='line-height: 120%;'>"
+            f"  <b style='color: #ffffff; font-size: 12px;'>{short_title}</b><br>"
+            f"  <span style='color: #8a8a8f; font-size: 11px;'>{media_type}</span><br>"
+            f"  <span style='color: #ffcc00; font-size: 11px;'>⭐ {score}/10</span>"
+            f"</div>")
     text.setAlignment(Qt.AlignCenter)
     text.setWordWrap(True)
 
     layout.addWidget(image_label)
     layout.addWidget(text)
     card.setLayout(layout)
-    card.setStyleSheet("QWidget {background-color: #2b2b2b; border-radius: 8px; } QLabel { background-color: transparent; }")
+    card.setStyleSheet("""
+            QWidget {
+                background-color: #242426;
+                border-radius: 10px;
+                border: 1px solid #2c2c2e;
+            }
+            QWidget:hover {
+                background-color: #2c2c2e;
+                border: 1px solid #ffcc00;
+            }
+            QLabel {
+                background-color: transparent;
+                border: none;
+            }
+        """)
 
     card.mousePressEvent = lambda event, m=media_id, t=title: click_callback(m, t)
 
