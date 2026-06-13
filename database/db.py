@@ -1,4 +1,5 @@
 import sqlite3
+from sqlite3.dbapi2 import Cursor
 
 
 def connect():
@@ -50,3 +51,12 @@ def get_media():
 
     connection.close()
     return data
+
+def delete_media(media_id):
+    connection = connect()
+    cursor = connection.cursor()
+
+    cursor.execute("DELETE FROM media WHERE id = ?", (media_id,))
+
+    connection.commit()
+    connection.close()
