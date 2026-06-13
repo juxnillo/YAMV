@@ -25,7 +25,7 @@ def create_table():
     connection.close()
 
 
-def add_media(title, type, genre, year, image, rating):
+def add_media(title, media_type, genre, year, image, rating):
     connection = connect()
     cursor = connection.cursor()
 
@@ -34,7 +34,7 @@ def add_media(title, type, genre, year, image, rating):
         INSERT INTO media (title, type, genre, year, image, rating)
         VALUES (?, ?, ?, ?, ?, ?)
     """,
-        (title, type, genre, year, image, rating),
+        (title, media_type, genre, year, image, rating),
     )
 
     connection.commit()
