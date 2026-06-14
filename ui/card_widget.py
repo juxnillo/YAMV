@@ -7,9 +7,11 @@ from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 def create_card(media_id, title, media_type, year, score, image_path, click_callback):
     card = QWidget()
     card.setCursor(Qt.PointingHandCursor)
+    card.setFixedWidth(150)
 
     layout = QVBoxLayout()
     layout.setContentsMargins(5, 5, 5, 5)
+    layout.setSpacing(6)
 
     image_label = QLabel()
     image_label.setFixedSize(140, 200)
@@ -50,6 +52,7 @@ def create_card(media_id, title, media_type, year, score, image_path, click_call
     )
     text.setAlignment(Qt.AlignCenter)
     text.setWordWrap(True)
+    text.setFixedWidth(140)
 
     card.setObjectName("AnimeCard")
     layout.addWidget(image_label)

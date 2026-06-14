@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
     QGridLayout,
+    QHBoxLayout,
     QMessageBox,
     QPushButton,
     QScrollArea,
@@ -58,9 +59,10 @@ def on_card_clicked(media_id, title):
 def refresh_grid():
     while cards_grid.count():
         item = cards_grid.takeAt(0)
-        widget = item.widget()
-        if widget is not None:
-            widget.deleteLater()
+        if item is not None:
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
     COLUMNS_MAX = 4
 
     for index, row in enumerate(get_media()):
@@ -71,6 +73,7 @@ def refresh_grid():
             row[0], row[1], row[2], row[4], row[6], row[5], on_card_clicked
         )
         cards_grid.addWidget(card_widget, fila, columna)
+        cards_grid.setColumnStretch(columna, 1)
 
 
 create_table()
@@ -119,7 +122,12 @@ cards_grid = QGridLayout()
 cards_grid.setSpacing(18)
 cards_grid.setAlignment(Qt.AlignTop | Qt.AlignLeft)
 
+content_layout = QHBoxLayout()
+content_layout.setContentsMargins(0, 0, 0, 0)
 content.setLayout(cards_grid)
+content_layout.addStretch(1)
+content.setLayout(content_layout)
+
 scroll.setWidget(content)
 scroll.setWidgetResizable(True)
 
