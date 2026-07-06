@@ -3,6 +3,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
+CACHE_IMAGENES = {}
 
 def create_card(media_id, title, media_type, year, score, image_path, click_callback):
     card = QWidget()
@@ -10,25 +11,31 @@ def create_card(media_id, title, media_type, year, score, image_path, click_call
     card.setFixedWidth(150)
 
     layout = QVBoxLayout()
-    layout.setContentsMargins(5, 5, 5, 5)
+    layout.setContentsMargins(8, 8, 8, 8)
     layout.setSpacing(6)
 
     image_label = QLabel()
-    image_label.setFixedSize(140, 200)
+    image_label.setFixedSize(134, 190)
     image_label.setAlignment(Qt.AlignCenter)
+    image_label.setStyleSheet("border-radius: 6px; background-color: #11111b;")
 
     pixmap = QPixmap()
 
-    if image_path.startswith("https://") or image_path.startswith("htpps://"):
-        try:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            }
-            img_data = requests.get(image_path, headers=headers).content
-            pixmap.loadFromData(img_data)
-        except Exception as e:
-            print(f"Error descargando imagen: {e}")
-            pixmap.load("images/default.png")
+    if image_path.startswith("https://") or image_path.startswith("http://"):
+        if image_path in CACHE_IMAGENES:
+            pixmap = CACHE_IMAGENES[image_path]
+        else:
+            try:
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                }
+                img_data = requests.get(image_path, headers=headers, timeout=3).content
+                pixmap.loadFromData(img_data)
+                if not pixmap.isNull():
+                    CACHE_IMAGENES[image_path] = pixmap
+            except Exception as e:
+                    print(f"Error descargando imagen para {title}: {e}")
+                    pixmap.load("images/default.png")
     else:
         pixmap.load(image_path)
 
@@ -36,10 +43,10 @@ def create_card(media_id, title, media_type, year, score, image_path, click_call
         pixmap.load("images/default.png")
 
     image_label.setPixmap(
-        pixmap.scaled(140, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        pixmap.scaled(134, 190, Qt.KeepAspectRatio, Qt.SmoothTransformation)
     )
 
-    short_title = title if len(title) < 20 else title[:17] + "..."
+    short_title = title if len(title) < 28 else title[:25] + "..."
     display_year = f"({year})" if year and year != 0 else ""
 
     text = QLabel(

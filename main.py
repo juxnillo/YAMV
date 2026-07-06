@@ -10,36 +10,41 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QVBoxLayout,
     QWidget,
+    QStackedWidget
 )
 
 from database.db import add_media, create_table, delete_media, get_media
 from ui.add_window import AddWindow
 from ui.card_widget import create_card
 
+def go_to_search():
+    stacked_widget.setCurrentIndex(1)
 
-def open_form():
-    dialog = AddWindow()
-
-    if dialog.exec():
-        title = str(dialog.selected_title)
-        media_type = str(dialog.selected_type)
-        image = str(dialog.selected_image)
+def go_back_to_main():
+    if search_panel.selected_title:
+        title = str(search_panel.selected_title)
+        media_type = str(search_panel.selected_type)
+        image = str(search_panel.selected_image)
 
         try:
-            score = int(dialog.selected_score)
+            score = int(search_panel.selected_score)
         except (TypeError, ValueError):
             score = 0
 
         try:
-            year = int(dialog.selected_year)
-            if year == 0:
-                year = 0000
+            year = int(search_panel.selected_year)
         except (TypeError, ValueError):
             year = 0
 
         add_media(title, media_type, "", year, image, score)
-        refresh_grid()
 
+        search_panel.selected_title= ""
+        search_panel.save_button.setEnabled(False)
+        search_panel.search_input.clear()
+        search_panel.results_list.clear()
+
+    refresh_grid()
+    stacked_widget.setCurrentIndex(0)
 
 def on_card_clicked(media_id, title):
     confirm = QMessageBox()
@@ -55,7 +60,6 @@ def on_card_clicked(media_id, title):
         delete_media(media_id)
         refresh_grid()
 
-
 def refresh_grid():
     while cards_grid.count():
         item = cards_grid.takeAt(0)
@@ -63,7 +67,12 @@ def refresh_grid():
             widget = item.widget()
             if widget is not None:
                 widget.deleteLater()
-    COLUMNS_MAX = 4
+
+    free_width = scroll.width()
+    card_width = 150
+    spacing = 15
+
+    COLUMNS_MAX = max(1, free_width // (card_width + spacing))
 
     for index, row in enumerate(get_media()):
         fila = index // COLUMNS_MAX
@@ -73,8 +82,8 @@ def refresh_grid():
             row[0], row[1], row[2], row[4], row[6], row[5], on_card_clicked
         )
         cards_grid.addWidget(card_widget, fila, columna)
-        cards_grid.setColumnStretch(columna, 1)
 
+    cards_grid.setColumnStretch(COLUMNS_MAX, 1)
 
 create_table()
 
@@ -113,31 +122,54 @@ window.setStyleSheet("""
     }
 """)
 
+# -- Layout --
 layout = QVBoxLayout()
 layout.setContentsMargins(20, 20, 20, 20)
+
+# -- Scroll --
 scroll = QScrollArea()
+scroll.setWidgetResizable(True)
+scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+# -- Content --
 content = QWidget()
 content.setStyleSheet("background-color: transparent;")
-cards_grid = QGridLayout()
-cards_grid.setSpacing(18)
-cards_grid.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-
-content_layout = QHBoxLayout()
+content_layout = QVBoxLayout(content)
 content_layout.setContentsMargins(0, 0, 0, 0)
-content.setLayout(cards_grid)
+
+# -- Grid --
+cards_grid = QGridLayout()
+cards_grid.setSpacing(15)
+content_layout.addLayout(cards_grid)
 content_layout.addStretch(1)
-content.setLayout(content_layout)
 
 scroll.setWidget(content)
-scroll.setWidgetResizable(True)
 
 button = QPushButton("Buscar y Añadir")
-button.clicked.connect(open_form)
+button.setFixedWidth(140)
+button.clicked.connect(go_to_search)
+
+bottom_layout = QHBoxLayout()
+bottom_layout.addStretch(1)
+bottom_layout.addWidget(button)
 
 layout.addWidget(scroll)
 layout.addSpacing(10)
-layout.addWidget(button)
-window.setLayout(layout)
+layout.addLayout(bottom_layout)
+
+# -- MainPage --
+main_page = QWidget()
+main_page.setLayout(layout)
+search_panel = AddWindow(on_back_callback=go_back_to_main)
+
+stacked_widget = QStackedWidget()
+stacked_widget.addWidget(main_page)
+stacked_widget.addWidget(search_panel)
+root_layout = QVBoxLayout(window)
+root_layout.setContentsMargins(0, 0, 0, 0)
+root_layout.addWidget(stacked_widget)
+
+window.resizeEvent = lambda event: refresh_grid()
 
 refresh_grid()
 window.show()

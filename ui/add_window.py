@@ -16,7 +16,6 @@ from PySide6.QtWidgets import (
 from models.anime_model import search_anime_api
 from ui import card_widget
 
-
 class ResultCard(QWidget):
     def __init__(self, title, anime_type, score, image_url, year):
         super().__init__()
@@ -31,17 +30,20 @@ class ResultCard(QWidget):
         self.img_label.setAlignment(Qt.AlignCenter)
 
         pixmap = QPixmap()
-        try:
-            headers = {"User-Agent": "Mozilla/5.0"}
-            img_data = requests.get(image_url, headers=headers, timeout=5).content
-            pixmap.loadFromData(img_data)
-            self.img_label.setPixmap(
-                pixmap.scaled(
-                    60, 85, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation
-                )
-            )
-        except:
-            self.img_label.setText("No Img")
+        if image_url.startswith("http"):
+                    try:
+                        headers = {"User-Agent": "Mozilla/5.0"}
+                        img_data = requests.get(image_url, headers=headers, timeout=3).content
+                        pixmap.loadFromData(img_data)
+                        self.img_label.setPixmap(
+                            pixmap.scaled(
+                                60, 85, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation
+                            )
+                        )
+                    except Exception:
+                        self.img_label.setText("No Img")
+        else:
+            self.img_label.setText("🍿")
 
         text_layout = QVBoxLayout()
         self.title_label = QLabel(f"<b>{title}</b>")
@@ -60,16 +62,12 @@ class ResultCard(QWidget):
         layout.addLayout(text_layout)
         self.setLayout(layout)
 
-
-class AddWindow(QDialog):
-    def __init__(self):
+class AddWindow(QWidget):
+    def __init__(self, on_back_callback):
         super().__init__()
-
-        self.setWindowTitle("Buscar en MyAnimeList")
-        self.resize(500, 600)
-
+        self.on_back_callback = on_back_callback
         self.setStyleSheet("""
-                    QDialog {
+                    QWidget {
                         background-color: #1e1e2e;
                         font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
                     }
@@ -106,12 +104,38 @@ class AddWindow(QDialog):
                         color: #545456;
                     }
 
-                    QPushButton[text="Añadir a coleccion"] {
-                        background-color: #853cdd;
+                    QPushButton#BackBtn {
+                        background-color: #5500bb;
+                        border-radius: 16px;
+                        padding: 0px;
+                    }
+
+                    QPushButton#BackBtn:hover {
+                         background-color: #313244;
+                    }
+                    QPushButton#BackBtn:pressed {
+                         background-color: #5500bb;
+                    }
+
+                    QPushButton#SearchBtn {
+                        background-color: #5500bb;
+                        border-radius: 11px;
+                    }
+
+                    QPushButton#SearchBtn:hover {
+                         background-color: #313244;
+                    }
+                    QPushButton#SearchBtn:pressed {
+                         background-color: #5500bb;
+                    }
+
+                    QPushButton#SaveBtn {
+                        background-color: #5500bb;
+                        border-radius: 16px;
                         color: white;
                     }
-                    QPushButton[text="Añadir a coleccion"]:hover {
-                        background-color: #5500bb;
+                    QPushButton#SaveBtn:hover {
+                        background-color: #313244;
                     }
 
                     QListWidget {
@@ -138,33 +162,64 @@ class AddWindow(QDialog):
                     }
                 """)
 
+        # -- Layout --
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(12)
 
+        # -- BackBtn --
+        icon_back = QIcon("icons/chevron-left.svg")
+        self.back_button = QPushButton()
+        self.back_button.setObjectName("BackBtn")
+        self.back_button.setCursor(Qt.PointingHandCursor)
+        self.back_button.setIcon(icon_back)
+        self.back_button.setIconSize(QSize(20, 20))
+
+        self.back_button.setFixedSize(40, 40)
+        self.back_button.clicked.connect(self.on_back_callback)
+        layout.addWidget(self.back_button)
+
+        # -- SearchBar --
         search_layout = QHBoxLayout()
         search_layout.setSpacing(8)
-
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Nombre del anime...")
 
-        # Boton Buscar
-        self.search_button = QPushButton("Buscar")
+        # -- SearchBtn --
+        icon_search = QIcon("icons/search.svg")
+        self.search_button = QPushButton()
+        self.search_button.setObjectName("SearchBtn")
         self.search_button.setCursor(Qt.PointingHandCursor)
+        self.search_button.setIcon(icon_search)
+        self.search_button.setIconSize(QSize(20, 20))
+        self.search_button.setFixedSize(40, 40)
         self.search_button.clicked.connect(self.search_anime)
-
         search_layout.addWidget(self.search_input)
         search_layout.addWidget(self.search_button)
         layout.addLayout(search_layout)
 
+        # -- SearchResults --
         self.results_list = QListWidget()
         layout.addWidget(self.results_list)
 
-        # Boton Guardar
-        self.save_button = QPushButton("Añadir a coleccion")
+        # -- SaveBtn --
+        icon_save = QIcon("icons/device-floppy.svg")
+        self.save_button = QPushButton()
+        self.save_button.setObjectName("SaveBtn")
+        self.save_button.setCursor(Qt.PointingHandCursor)
+        self.save_button.setIcon(icon_save)
+        self.save_button.setIconSize(QSize(20, 20))
+        self.save_button.setFixedSize(40, 40)
         self.save_button.setEnabled(False)
-        self.save_button.clicked.connect(self.accept)
-        layout.addWidget(self.save_button)
+        self.save_button.clicked.connect(self.save_and_close)
+
+        # -- LayoutBtn --
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addWidget(self.back_button)   # Se queda a la izquierda
+        buttons_layout.addStretch(1)                  # Hace de muelle en medio
+        buttons_layout.addWidget(self.save_button)
+
+        layout.addLayout(buttons_layout)
 
         self.setLayout(layout)
 
@@ -175,6 +230,9 @@ class AddWindow(QDialog):
         self.selected_year = 0
 
         self.results_list.itemClicked.connect(self.on_item_selected)
+
+    def save_and_close(self):
+        self.on_back_callback()
 
     def search_anime(self):
         query = self.search_input.text().strip()
