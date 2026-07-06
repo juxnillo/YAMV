@@ -1,13 +1,19 @@
-import requests
-
+from jikanpy import Jikan
+from jikanpy.exceptions import APIException, BadResponseException
 
 def search_anime_api(query):
-    url = f"https://api.jikan.moe/v4/anime?q={query}&limit=10"
+
+    jikan = Jikan()
+
     try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json().get("data", [])
+        response = jikan.search('anime', query, parameters={'limit': 5})
+        return response.get('data', [])
+    except BadResponseException as e:
+        print(f"La API de Jikan funciona, pero MAL no responde: {e}")
+        return None
+    except APIException as e:
+        print(f"Error de red en el modelo: {e}")
         return None
     except Exception as e:
-        print(f"Error de red en el modelo: {e}")
+        print(f"Error inesperado: {e}")
         return None
