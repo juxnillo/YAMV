@@ -7,7 +7,7 @@ CACHE_IMAGENES = {}
 
 def create_card(media_id, title, media_type, year, score, image_path, click_callback):
     card = QWidget()
-    card.setCursor(Qt.PointingHandCursor)
+    card.setCursor(Qt.CursorShape.PointingHandCursor)
     card.setFixedWidth(150)
 
     layout = QVBoxLayout()
@@ -16,7 +16,7 @@ def create_card(media_id, title, media_type, year, score, image_path, click_call
 
     image_label = QLabel()
     image_label.setFixedSize(134, 190)
-    image_label.setAlignment(Qt.AlignCenter)
+    image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
     image_label.setStyleSheet("border-radius: 6px; background-color: #11111b;")
 
     pixmap = QPixmap()
@@ -43,7 +43,7 @@ def create_card(media_id, title, media_type, year, score, image_path, click_call
         pixmap.load("images/default.png")
 
     image_label.setPixmap(
-        pixmap.scaled(134, 190, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        pixmap.scaled(134, 190, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
     )
 
     short_title = title if len(title) < 28 else title[:25] + "..."
@@ -57,7 +57,7 @@ def create_card(media_id, title, media_type, year, score, image_path, click_call
         f"  <span style='color: #ffcc00; font-size: 11px;'>⭐ {score}/10</span>"
         f"</div>"
     )
-    text.setAlignment(Qt.AlignCenter)
+    text.setAlignment(Qt.AlignmentFlag.AlignCenter)
     text.setWordWrap(True)
     text.setFixedWidth(140)
 

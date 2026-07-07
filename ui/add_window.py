@@ -2,7 +2,6 @@ import requests
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import (
-    QDialog,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -14,7 +13,6 @@ from PySide6.QtWidgets import (
 )
 
 from models.anime_model import search_anime_api
-from ui import card_widget
 
 class ResultCard(QWidget):
     def __init__(self, title, anime_type, score, image_url, year):
@@ -27,7 +25,7 @@ class ResultCard(QWidget):
         self.img_label = QLabel()
         self.img_label.setFixedSize(60, 85)
         self.img_label.setStyleSheet("border-radius: 4px; background-color: #2c2c2e;")
-        self.img_label.setAlignment(Qt.AlignCenter)
+        self.img_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         pixmap = QPixmap()
         if image_url.startswith("http"):
@@ -37,7 +35,7 @@ class ResultCard(QWidget):
                         pixmap.loadFromData(img_data)
                         self.img_label.setPixmap(
                             pixmap.scaled(
-                                60, 85, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation
+                                60, 85, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
                             )
                         )
                     except Exception:
@@ -171,7 +169,7 @@ class AddWindow(QWidget):
         icon_back = QIcon("icons/chevron-left.svg")
         self.back_button = QPushButton()
         self.back_button.setObjectName("BackBtn")
-        self.back_button.setCursor(Qt.PointingHandCursor)
+        self.back_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.back_button.setIcon(icon_back)
         self.back_button.setIconSize(QSize(20, 20))
 
@@ -189,7 +187,7 @@ class AddWindow(QWidget):
         icon_search = QIcon("icons/search.svg")
         self.search_button = QPushButton()
         self.search_button.setObjectName("SearchBtn")
-        self.search_button.setCursor(Qt.PointingHandCursor)
+        self.search_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.search_button.setIcon(icon_search)
         self.search_button.setIconSize(QSize(20, 20))
         self.search_button.setFixedSize(40, 40)
@@ -206,7 +204,7 @@ class AddWindow(QWidget):
         icon_save = QIcon("icons/device-floppy.svg")
         self.save_button = QPushButton()
         self.save_button.setObjectName("SaveBtn")
-        self.save_button.setCursor(Qt.PointingHandCursor)
+        self.save_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.save_button.setIcon(icon_save)
         self.save_button.setIconSize(QSize(20, 20))
         self.save_button.setFixedSize(40, 40)
@@ -265,7 +263,7 @@ class AddWindow(QWidget):
                 )
                 item.setSizeHint(QSize(0, 105))
                 item.setData(
-                    Qt.UserRole,
+                    Qt.ItemDataRole.UserRole,
                     {
                         "title": title,
                         "type": anime_type,
@@ -280,7 +278,7 @@ class AddWindow(QWidget):
             self.results_list.addItem("Error al conectar con el servidor o en la red")
 
     def on_item_selected(self, item):
-        data = item.data(Qt.UserRole)
+        data = item.data(Qt.ItemDataRole.UserRole)
         if not data:
             return
 

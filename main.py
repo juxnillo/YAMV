@@ -51,8 +51,8 @@ def on_card_clicked(media_id, title):
     confirm.setWindowTitle("Gestionar Anime")
     confirm.setText(f"Que quieres hacer con: \n\n {title}?")
 
-    delete_btn = confirm.addButton("Eliminar", QMessageBox.DestructiveRole)
-    cancel_btn = confirm.addButton("Cancelar", QMessageBox.RejectRole)
+    delete_btn = confirm.addButton("Eliminar", QMessageBox.ButtonRole.DestructiveRole)
+    cancel_btn = confirm.addButton("Cancelar", QMessageBox.ButtonRole.RejectRole)
 
     confirm.exec()
 
@@ -129,7 +129,7 @@ layout.setContentsMargins(20, 20, 20, 20)
 # -- Scroll --
 scroll = QScrollArea()
 scroll.setWidgetResizable(True)
-scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
 # -- Content --
 content = QWidget()
