@@ -3,51 +3,100 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
+# -- Constantes --
+CARD_WIDTH = 150
+CARD_IMG_SIZE = (134, 190)
+TEXT_WIDTH = 140
+TITLE_MAX_LEN = 28
+DEFAULT_IMAGE_PATH = "images/default.png"
+
+USER_AGENT = (
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
+CARD_STYLE = """
+        QWidget#AnimeCard {
+            background-color: #21222c;
+            border-radius: 10px;
+            border: 1px solid #2c2c2e;
+        }
+        QWidget#AnimeCard:hover {
+            background-color: #313244;
+            border: 1px solid #585b70;
+        }
+        QLabel {
+            background-color: transparent;
+            border: none;
+        }
+    """
+
+# -- Cache de pixmaps --
 CACHE_IMAGENES = {}
 
-def create_card(media_id, title, media_type, year, score, image_path, click_callback):
-    card = QWidget()
-    card.setCursor(Qt.CursorShape.PointingHandCursor)
-    card.setFixedWidth(150)
 
-    layout = QVBoxLayout()
-    layout.setContentsMargins(8, 8, 8, 8)
-    layout.setSpacing(6)
+# -- Helper imagen --
+def download_pixmap(image_url, title):
+    """Descarga la imagen y la devuelve a pixmap"""
 
-    image_label = QLabel()
-    image_label.setFixedSize(134, 190)
-    image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-    image_label.setStyleSheet("border-radius: 6px; background-color: #11111b;")
+    try:
+        headers = {"User-Agent": USER_AGENT}
+        img_data = requests.get(image_url, headers=headers, timeout=3).content
+    except Exception as e:
+        print(f"Error descargando imagen para {title}: {e}")
+        return None
 
     pixmap = QPixmap()
+    pixmap.loadFromData(img_data)
+    return pixmap if not pixmap.isNull() else None
 
-    if image_path.startswith("https://") or image_path.startswith("http://"):
+
+def load_pixmap(image_path, title):
+    """Resuelve la imagen de la tarjeta"""
+
+    is_remote = image_path.startswith("https://") or image_path.startswith("http://")
+
+    if is_remote:
         if image_path in CACHE_IMAGENES:
-            pixmap = CACHE_IMAGENES[image_path]
-        else:
-            try:
-                headers = {
-                    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                }
-                img_data = requests.get(image_path, headers=headers, timeout=3).content
-                pixmap.loadFromData(img_data)
-                if not pixmap.isNull():
-                    CACHE_IMAGENES[image_path] = pixmap
-            except Exception as e:
-                    print(f"Error descargando imagen para {title}: {e}")
-                    pixmap.load("images/default.png")
+            return CACHE_IMAGENES[image_path]
+
+        pixmap = download_pixmap(image_path, title)
+        if pixmap is not None:
+            CACHE_IMAGENES[image_path] = pixmap
+            return pixmap
     else:
+        pixmap = QPixmap()
         pixmap.load(image_path)
+        if not pixmap.isNull():
+            return pixmap
 
-    if pixmap.isNull():
-        pixmap.load("images/default.png")
+    fallback = QPixmap()
+    fallback.load(DEFAULT_IMAGE_PATH)
+    return fallback
 
-    image_label.setPixmap(
-        pixmap.scaled(134, 190, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+
+# -- Construccion de la tarjeta --
+def build_image_label(image_path, title):
+    label = QLabel()
+    label.setFixedSize(*CARD_IMG_SIZE)
+    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    label.setStyleSheet("border-radius: 6px; background-color: #11111b;")
+
+    pixmap = load_pixmap(image_path, title)
+    label.setPixmap(
+        pixmap.scaled(
+            *CARD_IMG_SIZE,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
     )
+    return label
 
-    short_title = title if len(title) < 28 else title[:25] + "..."
-    display_year = f"({year})" if year and year != 0 else ""
+
+def build_text_label(title, media_type, year, score):
+    short_title = (
+        title if len(title) < TITLE_MAX_LEN else title[: TITLE_MAX_LEN - 3] + "..."
+    )
+    display_year = f"({year})" if year else ""
 
     text = QLabel(
         f"<div style='line-height: 120%;'>"
@@ -59,28 +108,23 @@ def create_card(media_id, title, media_type, year, score, image_path, click_call
     )
     text.setAlignment(Qt.AlignmentFlag.AlignCenter)
     text.setWordWrap(True)
-    text.setFixedWidth(140)
+    text.setFixedWidth(TEXT_WIDTH)
+    return text
 
+
+def create_card(media_id, title, media_type, year, score, image_path, click_callback):
+    card = QWidget()
     card.setObjectName("AnimeCard")
-    layout.addWidget(image_label)
-    layout.addWidget(text)
+    card.setCursor(Qt.CursorShape.PointingHandCursor)
+    card.setFixedWidth(CARD_WIDTH)
+    card.setStyleSheet(CARD_STYLE)
+
+    layout = QVBoxLayout()
+    layout.setContentsMargins(8, 8, 8, 8)
+    layout.setSpacing(6)
+    layout.addWidget(build_image_label(image_path, title))
+    layout.addWidget(build_text_label(title, media_type, year, score))
     card.setLayout(layout)
-    card.setStyleSheet("""
-            QWidget#AnimeCard {
-                background-color: #21222c;
-                border-radius: 10px;
-                border: 1px solid #2c2c2e;
-            }
-            QWidget#AnimeCard:hover {
-                background-color: #313244;
-                border: 1px solid #585b70;
-            }
-            QLabel {
-                background-color: transparent;
-                border: none;
-            }
-        """)
 
     card.mousePressEvent = lambda event, m=media_id, t=title: click_callback(m, t)
-
     return card

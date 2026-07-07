@@ -1,13 +1,18 @@
 from jikanpy import Jikan
 from jikanpy.exceptions import APIException
 
-def search_anime_api(query):
+# -- Constantes --
+SEARCH_LIMIT = 5
 
-    jikan = Jikan()
+# -- API --
+jikan = Jikan()
+
+
+def search_anime_api(query: str) -> list | None:
 
     try:
-        response = jikan.search('anime', query, parameters={'limit': 5})
-        return response.get('data', [])
+        response = jikan.search("anime", query, parameters={"limit": SEARCH_LIMIT})
+        return response.get("data", [])
 
     except APIException as e:
         print(f"Error de red en el modelo: {e}")

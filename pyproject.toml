@@ -5,6 +5,7 @@ description = "Yet-Another-Media-Vault -- App for Tracking anime series and movi
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "black>=26.5.1",
     "jikanpy-v4==1.0.2",
     "pyside6==6.11.1",
     "pyside6-addons==6.11.1",
