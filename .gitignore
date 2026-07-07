@@ -1,0 +1,11 @@
+# Virtual Env
+.venv/
+venv/
+env/
+
+# Cache
+**/__pycache__
+*.pyc
+
+# Personal Database
+**/collection.db

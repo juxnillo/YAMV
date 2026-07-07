@@ -3,7 +3,7 @@ from sqlite3.dbapi2 import Cursor
 
 
 def connect():
-    return sqlite3.connect("collection.db")
+    return sqlite3.connect("database/collection.db")
 
 
 def create_table():
