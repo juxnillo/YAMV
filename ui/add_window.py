@@ -172,7 +172,6 @@ class AddWindow(QWidget):
         self.back_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.back_button.setIcon(icon_back)
         self.back_button.setIconSize(QSize(20, 20))
-
         self.back_button.setFixedSize(40, 40)
         self.back_button.clicked.connect(self.on_back_callback)
         layout.addWidget(self.back_button)
@@ -211,10 +210,9 @@ class AddWindow(QWidget):
         self.save_button.setEnabled(False)
         self.save_button.clicked.connect(self.save_and_close)
 
-        # -- LayoutBtn --
+        # -- LayoutBtnBottom --
         buttons_layout = QHBoxLayout()
-        buttons_layout.addWidget(self.back_button)   # Se queda a la izquierda
-        buttons_layout.addStretch(1)                  # Hace de muelle en medio
+        buttons_layout.addStretch(1)
         buttons_layout.addWidget(self.save_button)
 
         layout.addLayout(buttons_layout)
